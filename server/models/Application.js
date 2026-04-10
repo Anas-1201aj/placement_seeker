@@ -1,0 +1,68 @@
+import mongoose from 'mongoose';
+
+const ApplicationSchema = new mongoose.Schema({
+    jobID: {
+        type: String,
+        required: true,
+        ref: 'Job'
+    },
+    candidateID: {
+        type: String,
+        required: true,
+        ref: 'User'
+    },
+    applicationStatusId: {
+        type: String,
+        required: true,
+    },
+    jobStatusId: {
+        type: String,
+        required: true,
+    },
+    resume: {
+        type: String,
+        required: true,
+    },
+    contactInfo: {
+        type: String,
+        required: true,
+    },
+    emailInfo: {
+        type: String,
+        required: true,
+    },
+    experience: {
+        type: String,
+        required: true,
+    },
+    interview_id: {
+        type: String,
+        required: false,
+    },
+    questions: {
+        type: Array,
+        required: false,
+    },
+    answers: {
+        type: Array,
+        required: false,
+    },
+    company_id: {
+        type: String,
+        required: true
+    },
+    resume_status: {
+        type: String,
+        default: "open"
+    },
+    rag_uploaded: {
+        type: String,
+        default: "false"
+    }
+},
+    { timestamps: true }
+);
+
+const Application = mongoose.model('Application', ApplicationSchema);
+
+export default Application;

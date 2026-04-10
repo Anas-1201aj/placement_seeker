@@ -1,0 +1,418 @@
+"use client"
+import React, { useEffect, useState } from 'react';
+import StatusSidebar from './StatusSidebar';
+import ApplicationsTable from './ApplicationsTable';
+import ConfirmationDialog from './ConfirmationDialog';
+import ResumeModal from './ResumeModal';
+import { SlidersHorizontal, Sparkles } from 'lucide-react';
+import { useTheme } from '../../../context/ThemeContext';
+
+const ApplicationsListTab = ({
+    job,
+    onStatusChange,
+    applications,
+    page,
+    limit,
+    search,
+    monthFilter,
+    yearFilter,
+    setPage,
+    setLimit,
+    setSearch,
+    setMonthFilter,
+    setYearFilter,
+    currentPage,
+    totalPages,
+    getMonthOptions,
+    getYearOptions,
+    clearFilters,
+    totalApplications,
+    statusCounts,
+    statusFilter,
+    setStatusFilter,
+    aiSelected,
+    setAiSelected
+}) => {
+    const [allApps, setAllApps] = useState(applications);
+    // const [statusFilter, setStatusFilter] = useState('');
+    const [statuses, setStatuses] = useState([]);
+    const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+    const [showFilters, setShowFilters] = useState(false);
+
+    const { theme } = useTheme();
+
+    useEffect(() => {
+        const handleResize = () => {
+            setIsMobile(window.innerWidth <= 768);
+        };
+
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
+
+    useEffect(() => {
+        setAllApps(applications);
+    }, [applications]);
+
+    const FilterSection = () => (
+        <div className={`shadow-md rounded-xl p-5 border transition-colors duration-300 ${theme === 'dark' ? 'bg-white/10 border-gray-700' : 'bg-white border-gray-100'
+            }`}>
+            <div className={`flex items-center justify-between mb-5 border-b pb-2 ${theme === 'dark' ? 'border-gray-700' : 'border-gray-100'}`}>
+                <h3 className="text-base font-semibold bg-[#9333ea] bg-clip-text text-transparent">
+                    Filter Applications
+                </h3>
+
+                <button
+                    onClick={clearFilters}
+                    className={`text-xs font-medium px-3 py-1 rounded-full border transition-all duration-200 ${theme === 'dark'
+                        ? 'bg-red-900/30 text-red-300 border-red-800 hover:bg-red-900/50'
+                        : 'bg-red-50 text-red-600 border-red-200 hover:bg-red-100 hover:text-red-700'
+                        }`}
+                >
+                    Clear
+                </button>
+            </div>
+
+            <div className="grid grid-cols-2 gap-5">
+                <div>
+                    <label className={`text-xs font-medium mb-2 block ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+                        Month
+                    </label>
+                    <select
+                        value={monthFilter}
+                        onChange={(e) => setMonthFilter(e.target.value)}
+                        className={`w-full border rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition ${theme === 'dark'
+                            ? 'bg-gray-700 border-gray-600 text-white hover:bg-gray-600'
+                            : 'bg-gray-50 border-gray-300 text-gray-700 hover:bg-gray-100'
+                            }`}
+                    >
+                        <option value="">All Months</option>
+                        {getMonthOptions().map((option) => (
+                            <option key={option.value} value={option.value}>
+                                {option.label}
+                            </option>
+                        ))}
+                    </select>
+                </div>
+
+                <div>
+                    <label className={`text-xs font-medium mb-2 block ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+                        Year
+                    </label>
+                    <select
+                        value={yearFilter}
+                        onChange={(e) => setYearFilter(e.target.value)}
+                        className={`w-full border rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition ${theme === 'dark'
+                            ? 'bg-gray-700 border-gray-600 text-white hover:bg-gray-600'
+                            : 'bg-gray-50 border-gray-300 text-gray-700 hover:bg-gray-100'
+                            }`}
+                    >
+                        <option value="">All Years</option>
+                        {getYearOptions().map((year) => (
+                            <option key={year} value={year}>
+                                {year}
+                            </option>
+                        ))}
+                    </select>
+                </div>
+            </div>
+        </div>
+    );
+
+    const [confirmDialog, setConfirmDialog] = useState({
+        isOpen: false,
+        title: '',
+        message: '',
+        onConfirm: null,
+        applicationId: null,
+        newStatus: ''
+    });
+
+    const [resumeModal, setResumeModal] = useState({
+        isOpen: false,
+        resumeData: null
+    });
+
+    const handleStatusUpdate = async (applicationId, newStatus) => {
+        try {
+            const app = allApps.find(a => a._id === applicationId);
+            if (app && app.applicationStatusId === newStatus) return;
+
+            setConfirmDialog({
+                isOpen: true,
+                title: 'Update Application Status',
+                message: `Are you sure you want to change the status from "${app?.applicationStatus}" to "${newStatus}"?`,
+                applicationId: applicationId,
+                newStatus: newStatus,
+                onConfirm: () => confirmStatusChange(applicationId, newStatus)
+            });
+        } catch (err) {
+            console.error(err);
+            alert("Failed to update status");
+        }
+    };
+
+    const confirmStatusChange = async (appId, newStatus) => {
+        try {
+            await updateApplicationStatus(appId, newStatus);
+            onStatusChange();
+            setConfirmDialog(dialog => ({ ...dialog, isOpen: false }));
+        } catch (err) {
+            console.error(err);
+            alert("Failed to update status");
+        }
+    };
+
+    useEffect(() => {
+        const fetchApplicationStatuses = async () => {
+            try {
+                const storedUser = JSON.parse(localStorage.getItem('user'));
+                if (!storedUser?.company_id) return;
+
+                const res = await fetch(
+                    `${process.env.REACT_APP_BASE_URL}/application-statuses/all-application-statuses`,
+                    {
+                        headers: {
+                            'Company_id': storedUser.company_id,
+                        },
+                    }
+                );
+                if (!res.ok) throw new Error('Failed to fetch application statuses');
+
+                const { applicationStatuses } = await res.json();
+                applicationStatuses.sort((a, b) =>
+                    Number(a.applicationStep) - Number(b.applicationStep)
+                );
+
+                setStatuses(applicationStatuses);
+            } catch (err) {
+                console.error('Error fetching statuses:', err);
+            }
+        };
+
+        fetchApplicationStatuses();
+    }, []);
+
+    const updateApplicationStatus = async (applicationId, newStatus) => {
+        try {
+            const response = await fetch(
+                `${process.env.REACT_APP_BASE_URL}/application/update-candidate-application/${applicationId}`,
+                {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ applicationStatusId: newStatus }),
+                }
+            );
+
+            if (!response.ok) {
+                throw new Error('Failed to update application status');
+            }
+
+            onStatusChange();
+            return await response.json();
+        } catch (error) {
+            console.error('Error updating application status:', error);
+            throw error;
+        }
+    };
+
+    const getStatusCount = (status) => {
+        return allApps?.filter(app => app.applicationStatusId === status).length;
+    };
+
+    const handleStatusChangeRequest = (appId, newStatus) => {
+        const app = allApps.find(a => a._id === appId);
+        if (app && app.applicationStatusId === newStatus) return;
+
+        setConfirmDialog({
+            isOpen: true,
+            title: 'Update Application Status',
+            message: `Are you sure you want to change the status from "${app?.applicationStatus}" to "${newStatus}"?`,
+            applicationId: appId,
+            newStatus: newStatus,
+            onConfirm: () => confirmStatusChange(appId, newStatus)
+        });
+    };
+
+    const handleViewResume = async (application) => {
+        try {
+            setResumeModal({
+                isOpen: true,
+                resumeData: application,
+            });
+        } catch (error) {
+            console.error("Error fetching resume:", error);
+            alert("Failed to load resume. Please try again.");
+        }
+    };
+
+    const filteredApps = allApps;
+
+    return (
+        <div className="flex flex-col md:flex-row gap-6 items-start justify-center">
+            {/* Mobile Layout */}
+            {isMobile && (
+                <>
+                    <div className="flex-1 space-y-6 w-80">
+                        <div className="flex items-center justify-between">
+                            <h2 className="text-xl font-semibold">
+                                {aiSelected ? "AI Selected Applications" : "Applications List"}
+                            </h2>
+                            <div className="flex items-center gap-2">
+                                <button
+                                    onClick={() => setShowFilters(!showFilters)}
+                                    className={`text-sm px-3 py-1 rounded-lg border transition ${theme === 'dark'
+                                        ? 'border-gray-600 text-gray-300 hover:bg-gray-700'
+                                        : 'border-gray-300 hover:bg-gray-100'
+                                        }`}
+                                >
+                                    {showFilters ? "Hide Filters" : "Show Filters"}
+                                </button>
+                                <button
+                                    onClick={() => {
+                                        setAiSelected(!aiSelected);
+                                        setPage('1');
+                                    }}
+                                    className={`text-sm px-3 py-1 rounded-lg border transition flex items-center gap-1 ${aiSelected
+                                        ? 'bg-purple-600 text-white border-purple-600'
+                                        : (theme === 'dark'
+                                            ? 'border-gray-600 text-gray-300 hover:bg-gray-700'
+                                            : 'border-gray-300 hover:bg-gray-100')
+                                        }`}
+                                >
+                                    <Sparkles size={14} />
+                                    AI {aiSelected ? "View" : "Selected"}
+                                </button>
+                            </div>
+                        </div>
+
+                        {showFilters && <FilterSection />}
+
+                        <ApplicationsTable
+                            job={job}
+                            filteredApps={filteredApps}
+                            statuses={statuses}
+                            onStatusChange={handleStatusChangeRequest}
+                            onViewResume={handleViewResume}
+                            page={page}
+                            limit={limit}
+                            search={search}
+                            setPage={setPage}
+                            setLimit={setLimit}
+                            setSearch={setSearch}
+                            currentPage={currentPage}
+                            totalApplications={totalApplications}
+                            totalPages={totalPages}
+                            aiSelected={aiSelected}
+                        />
+                    </div>
+
+                    <StatusSidebar
+                        statuses={statuses}
+                        statusFilter={statusFilter}
+                        setStatusFilter={setStatusFilter}
+                        allApps={allApps}
+                        getStatusCount={getStatusCount}
+                        statusCounts={statusCounts}
+                        totalApplications={totalApplications}
+                        aiSelected={aiSelected}
+                    />
+                </>
+            )}
+
+            {/* Desktop Layout */}
+            {!isMobile && (
+                <>
+                    <StatusSidebar
+                        statuses={statuses}
+                        statusFilter={statusFilter}
+                        setStatusFilter={setStatusFilter}
+                        allApps={allApps}
+                        getStatusCount={getStatusCount}
+                        statusCounts={statusCounts}
+                        totalApplications={totalApplications}
+                        aiSelected={aiSelected}
+                    />
+
+                    <div className="flex-1 space-y-6 w-[70vw]">
+                        <div className="flex items-center justify-between">
+                            <h2 className="text-xl font-semibold">
+                                {aiSelected ? "AI Selected Applications" : "Applications List"}
+                            </h2>
+
+                            <div className="flex items-center gap-3">
+                                <button
+                                    onClick={() => {
+                                        setAiSelected(!aiSelected);
+                                        setPage('1');
+                                    }}
+                                    className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 shadow-md ${aiSelected
+                                        ? 'bg-purple-600 text-white hover:bg-purple-700'
+                                        : (theme === 'dark'
+                                            ? 'bg-gray-800 text-gray-300 hover:bg-gray-700 border border-gray-700'
+                                            : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-200')
+                                        }`}
+                                >
+                                    <Sparkles size={16} className={aiSelected ? "text-yellow-300" : "text-purple-500"} />
+                                    AI {aiSelected ? "View" : "Selected"}
+                                </button>
+
+                                <button
+                                    onClick={() => setShowFilters(!showFilters)}
+                                    className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium
+               bg-[#9333ea] text-white shadow-md
+               hover:bg-purple-700 transition-all duration-300`}
+                                >
+                                    <SlidersHorizontal size={16} />
+                                    {showFilters ? "Hide Filters" : "Filter By Month"}
+                                </button>
+                            </div>
+                        </div>
+
+                        {showFilters && <FilterSection />}
+
+                        <ApplicationsTable
+                            job={job}
+                            filteredApps={filteredApps}
+                            statuses={statuses}
+                            onStatusChange={handleStatusChangeRequest}
+                            onViewResume={handleViewResume}
+                            page={page}
+                            limit={limit}
+                            search={search}
+                            setPage={setPage}
+                            setLimit={setLimit}
+                            setSearch={setSearch}
+                            currentPage={currentPage}
+                            totalApplications={totalApplications}
+                            totalPages={totalPages}
+                            setMonthFilter={setMonthFilter}
+                            setYearFilter={setYearFilter}
+                            monthFilter={monthFilter}
+                            yearFilter={yearFilter}
+                            aiSelected={aiSelected}
+                        />
+                    </div>
+                </>
+            )}
+
+            <ConfirmationDialog
+                isOpen={confirmDialog.isOpen}
+                title={confirmDialog.title}
+                message={confirmDialog.message}
+                onConfirm={() => confirmStatusChange(confirmDialog.applicationId, confirmDialog.newStatus)}
+                onClose={() => setConfirmDialog({ ...confirmDialog, isOpen: false })}
+            />
+
+            <ResumeModal
+                isOpen={resumeModal.isOpen}
+                resumeData={resumeModal.resumeData}
+                onClose={() => setResumeModal({ ...resumeModal, isOpen: false })}
+            />
+        </div>
+    );
+};
+
+export default ApplicationsListTab;
