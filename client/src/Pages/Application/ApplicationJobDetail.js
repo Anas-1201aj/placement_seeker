@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useCallback } from 'react';
 
 import { useNavigate, useParams } from 'react-router-dom';
@@ -22,8 +23,11 @@ const ApplicationJobDetail = () => {
     const [aiSelected, setAiSelected] = useState(false);
     const [loading, setLoading] = useState(true);
 
+    const aiFeaturesEnabled = localStorage.getItem(`ai_features_${companyUserName}`) === 'true';
+    const onlyAiFeaturesEnabled = localStorage.getItem(`only_ai_features_${companyUserName}`) === 'true';
+
     const [error, setError] = useState('');
-    const [activeTab, setActiveTab] = useState('applications');
+    const [activeTab, setActiveTab] = useState(onlyAiFeaturesEnabled ? 'ai-selected' : 'applications');
     const navigate = useNavigate();
     // NEW: state for job-statuses
     const [jobStatuses, setJobStatuses] = useState([]);
@@ -38,6 +42,12 @@ const ApplicationJobDetail = () => {
         setToggleCount(count => count + 1);
     }, []);
 
+
+    useEffect(() => {
+        if (onlyAiFeaturesEnabled && !aiSelected) {
+            setAiSelected(true);
+        }
+    }, [onlyAiFeaturesEnabled, aiSelected]);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -65,7 +75,7 @@ const ApplicationJobDetail = () => {
                     params.append('year', yearFilter);
                 }
 
-                if (aiSelected) {
+                if (aiSelected || (onlyAiFeaturesEnabled && activeTab === 'ai-selected')) {
                     params.append('aiSelected', 'true');
                 }
 
@@ -87,7 +97,7 @@ const ApplicationJobDetail = () => {
         };
 
         fetchData();
-    }, [id, page, limit, search, monthFilter, yearFilter, toggleCount, statusFilter, aiSelected]);
+    }, [id, page, limit, search, monthFilter, yearFilter, toggleCount, statusFilter, aiSelected, onlyAiFeaturesEnabled, activeTab]);
 
     // NEW: fetch job-statuses on mount
     useEffect(() => {
@@ -234,7 +244,7 @@ const ApplicationJobDetail = () => {
 
                         {/* Right Side: Button */}
                         <div>
-                            {(isRecruiterManager || isAdmin) && (
+                            {(isRecruiterManager || isAdmin) && !onlyAiFeaturesEnabled && (
                                 <button
                                     onClick={() => navigate(`/${companyUserName}/current-job/${id}`)}
                                     className="bg-[#9333ea] hover:bg-purple-700 text-white font-semibold px-5 py-2 rounded-xl shadow transition"
@@ -286,7 +296,11 @@ const ApplicationJobDetail = () => {
                                     name: 'AI Selected',
                                     icon: <Sparkles className="w-5 h-5" />
                                 }
-                            ].map((tab) => (
+                            ].filter(tab => {
+                                if (tab.id === 'ai-selected') return aiFeaturesEnabled;
+                                if (onlyAiFeaturesEnabled && (tab.id === 'overview' || tab.id === 'applications')) return false;
+                                return true;
+                            }).map((tab) => (
                                 <button
                                     key={tab.id}
                                     onClick={() => setActiveTab(tab.id)}
@@ -344,6 +358,8 @@ const ApplicationJobDetail = () => {
                                     }
                                     setAiSelected(val);
                                 }}
+                                aiFeaturesEnabled={aiFeaturesEnabled}
+                                onlyAiFeaturesEnabled={onlyAiFeaturesEnabled}
                             />}
                         {activeTab === 'details' && <JobDetailsTab job={job} setJob={setJob} />}
                     </div>

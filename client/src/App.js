@@ -153,6 +153,8 @@ function App() {
         } else {
           localStorage.setItem("companyId", res.data._id);
           localStorage.setItem("companyUserName", slug);
+          localStorage.setItem(`ai_features_${slug}`, res.data.aiFeaturesEnabled);
+          localStorage.setItem(`only_ai_features_${slug}`, res.data.onlyAiFeaturesEnabled);
         }
       })
       .catch(err => {

@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useCallback } from 'react';
 import { useTheme } from '../../../context/ThemeContext';
 
@@ -96,6 +97,7 @@ const ApplicationsTable = ({
     };
 
     const companyUserName = localStorage.getItem("companyUserName");
+    const aiFeaturesEnabled = localStorage.getItem(`ai_features_${companyUserName}`) === 'true';
 
     const debouncedSetSearch = useCallback(
         debounce((value) => {
@@ -207,7 +209,7 @@ const ApplicationsTable = ({
                                                         className="text-sm font-medium text-purple-600 hover:underline group-hover:text-white flex items-center gap-1"
                                                     >
                                                         {capitalizeFirstLetter(app.candidateID?.userName) || 'N/A'}
-                                                        {app.resume_status === 'selected' && (
+                                                        {aiFeaturesEnabled && app.resume_status === 'selected' && (
                                                             <Sparkles size={14} className="text-yellow-500" title="AI Selected" />
                                                         )}
                                                     </Link>
@@ -234,7 +236,7 @@ const ApplicationsTable = ({
                                                         value={status._id}
                                                         className="bg-gray-800 text-white"
                                                     >
-                                                        {status.applicationStatus?.toLowerCase() === 'applied' && app.resume_status === 'selected' && aiSelected ? 'AI Selected' : status.applicationStatus}
+                                                        {aiFeaturesEnabled && status.applicationStatus?.toLowerCase() === 'applied' && app.resume_status === 'selected' && aiSelected ? 'AI Selected' : status.applicationStatus}
                                                     </option>
                                                 ))}
                                             </select>

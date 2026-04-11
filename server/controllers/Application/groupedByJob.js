@@ -4,7 +4,7 @@ import Company from '../../models/company.js';
 
 const getAllApplicationsGroupedByJob = async (req, res) => {
     try {
-        let { page = 1, limit = 10, title, city, locationType, type, scheduleType, hireType, } = req.query;
+        let { page = 1, limit = 10, title, city, locationType, type, scheduleType, hireType, aiSelected } = req.query;
         let { company_id } = req.headers;
 
         const pageNumber = parseInt(page, 10) || 1;
@@ -48,7 +48,11 @@ const getAllApplicationsGroupedByJob = async (req, res) => {
         const jobIds = filteredJobs.map(job => job._id);
 
         // Step 4: Get all applications for these jobs
-        const applications = await Application.find({ jobID: { $in: jobIds } });
+        let appFilter = { jobID: { $in: jobIds } };
+        if (aiSelected === 'true') {
+            appFilter.resume_status = 'selected';
+        }
+        const applications = await Application.find(appFilter);
         console.log(`Found ${applications.length} applications for the filtered jobs`);
 
         if (applications.length === 0) {

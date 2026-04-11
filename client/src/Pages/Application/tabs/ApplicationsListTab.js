@@ -31,7 +31,9 @@ const ApplicationsListTab = ({
     statusFilter,
     setStatusFilter,
     aiSelected,
-    setAiSelected
+    setAiSelected,
+    aiFeaturesEnabled,
+    onlyAiFeaturesEnabled
 }) => {
     const [allApps, setAllApps] = useState(applications);
     // const [statusFilter, setStatusFilter] = useState('');
@@ -270,21 +272,23 @@ const ApplicationsListTab = ({
                                 >
                                     {showFilters ? "Hide Filters" : "Show Filters"}
                                 </button>
-                                <button
-                                    onClick={() => {
-                                        setAiSelected(!aiSelected);
-                                        setPage('1');
-                                    }}
-                                    className={`text-sm px-3 py-1 rounded-lg border transition flex items-center gap-1 ${aiSelected
-                                        ? 'bg-purple-600 text-white border-purple-600'
-                                        : (theme === 'dark'
-                                            ? 'border-gray-600 text-gray-300 hover:bg-gray-700'
-                                            : 'border-gray-300 hover:bg-gray-100')
-                                        }`}
-                                >
-                                    <Sparkles size={14} />
-                                    AI {aiSelected ? "View" : "Selected"}
-                                </button>
+                                {aiFeaturesEnabled && !onlyAiFeaturesEnabled && (
+                                    <button
+                                        onClick={() => {
+                                            setAiSelected(!aiSelected);
+                                            setPage('1');
+                                        }}
+                                        className={`text-sm px-3 py-1 rounded-lg border transition flex items-center gap-1 ${aiSelected
+                                            ? 'bg-purple-600 text-white border-purple-600'
+                                            : (theme === 'dark'
+                                                ? 'border-gray-600 text-gray-300 hover:bg-gray-700'
+                                                : 'border-gray-300 hover:bg-gray-100')
+                                            }`}
+                                    >
+                                        <Sparkles size={14} />
+                                        AI {aiSelected ? "View" : "Selected"}
+                                    </button>
+                                )}
                             </div>
                         </div>
 
@@ -343,21 +347,23 @@ const ApplicationsListTab = ({
                             </h2>
 
                             <div className="flex items-center gap-3">
-                                <button
-                                    onClick={() => {
-                                        setAiSelected(!aiSelected);
-                                        setPage('1');
-                                    }}
-                                    className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 shadow-md ${aiSelected
-                                        ? 'bg-purple-600 text-white hover:bg-purple-700'
-                                        : (theme === 'dark'
-                                            ? 'bg-gray-800 text-gray-300 hover:bg-gray-700 border border-gray-700'
-                                            : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-200')
-                                        }`}
-                                >
-                                    <Sparkles size={16} className={aiSelected ? "text-yellow-300" : "text-purple-500"} />
-                                    AI {aiSelected ? "View" : "Selected"}
-                                </button>
+                                {aiFeaturesEnabled && !onlyAiFeaturesEnabled && (
+                                    <button
+                                        onClick={() => {
+                                            setAiSelected(!aiSelected);
+                                            setPage('1');
+                                        }}
+                                        className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 shadow-md ${aiSelected
+                                            ? 'bg-purple-600 text-white hover:bg-purple-700'
+                                            : (theme === 'dark'
+                                                ? 'bg-gray-800 text-gray-300 hover:bg-gray-700 border border-gray-700'
+                                                : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-200')
+                                            }`}
+                                    >
+                                        <Sparkles size={16} className={aiSelected ? "text-yellow-300" : "text-purple-500"} />
+                                        AI {aiSelected ? "View" : "Selected"}
+                                    </button>
+                                )}
 
                                 <button
                                     onClick={() => setShowFilters(!showFilters)}

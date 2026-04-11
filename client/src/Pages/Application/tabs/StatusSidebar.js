@@ -22,7 +22,7 @@ const StatusSidebar = ({ statuses, statusFilter, setStatusFilter, allApps, getSt
                             }`}
                     >
                         <div className="flex justify-between items-center">
-                            <span>{aiSelected ? 'AI Selected' : 'All Applications'}</span>
+                            <span>{aiSelected ? 'All AI Selected' : 'All Applications'}</span>
                             <span className={`px-2 py-0.5 rounded-full text-xs ${theme === 'dark' ? 'bg-gray-700 text-gray-300' : 'bg-gray-100 text-gray-600'
                                 }`}>
                                 {computedTotal}
@@ -33,11 +33,6 @@ const StatusSidebar = ({ statuses, statusFilter, setStatusFilter, allApps, getSt
                         const colorName = status.color || getStatusColor(status.applicationStatus);
                         const isSelected = statusFilter === status._id;
                         const count = statusCounts ? (statusCounts[status._id] || 0) : getStatusCount(status._id);
-                        
-                        // Determine the label to display
-                        const displayLabel = (aiSelected && status.applicationStatus?.toLowerCase() === 'applied') 
-                            ? 'AI Selected' 
-                            : status.applicationStatus;
 
                         return (
                             <button
@@ -58,7 +53,7 @@ const StatusSidebar = ({ statuses, statusFilter, setStatusFilter, allApps, getSt
                                             className="w-2 h-2 rounded-full mr-2"
                                             style={{ backgroundColor: getColorStyles(colorName, 500) }}
                                         ></span>
-                                        <span>{displayLabel}</span>
+                                        <span>{aiSelected && status.applicationStatus?.toLowerCase() === 'applied' ? 'AI Selected' : status.applicationStatus}</span>
                                     </div>
                                     <span
                                         className="px-2 py-0.5 rounded-full text-xs"

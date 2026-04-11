@@ -22,6 +22,10 @@ const getApplicationsByJobId = async (req, res) => {
     // Build the base filter object
     let filter = { jobID: jobId };
 
+    if (aiSelected === 'true') {
+      filter.resume_status = 'selected';
+    }
+
     // If search is provided, find candidate IDs that match the username search
     if (search) {
       // Find candidates whose username matches the search term
@@ -53,11 +57,6 @@ const getApplicationsByJobId = async (req, res) => {
         $gte: startDate,
         $lte: endDate
       };
-    }
-
-    // AI Status filter
-    if (aiSelected === 'true') {
-      filter.resume_status = "selected";
     }
 
     // NEW: Get counts for each applicationStatusId BEFORE adding status filter
