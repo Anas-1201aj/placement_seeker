@@ -175,15 +175,30 @@ export const ApplicationForm = ({
       (status) => status.jobStatus === "Applied",
     );
     const step1Status = applicationStatusesData?.applicationStatuses?.find(
-      (status) => status.applicationStep === "1",
-    );
+      (status) => String(status.applicationStep) === "1",
+    ) || (applicationStatusesData?.applicationStatuses?.length ? applicationStatusesData.applicationStatuses[0] : null);
     const finalCandidateID = isRecruiterManager ? candidateID : loginData._id;
 
+    // Guard: applicationStatusId is required by the backend
+    if (!step1Status?._id) {
+      setIsSubmitting(false);
+      alert("Unable to submit: application status configuration is missing for this company. Please contact support.");
+      return;
+    }
+
+    // Guard: jobStatusId is required by the backend
+    const appliedJobStatus = jobStatus?.length ? jobStatus[0]._id : null;
+    if (!appliedJobStatus && !job.status) {
+      setIsSubmitting(false);
+      alert("Unable to submit: job status configuration is missing. Please contact support.");
+      return;
+    }
+
     formData.append("candidateID", finalCandidateID);
-    formData.append("candidateName", loginData?.name || ""); // Add candidate name
+    formData.append("candidateName", loginData?.userName || loginData?.name || ""); // Add candidate name (try userName first)
     formData.append("jobID", job._id);
-    formData.append("applicationStatusId", step1Status?._id || "");
-    formData.append("jobStatusId", jobStatus.length ? jobStatus[0]._id : job.status);
+    formData.append("applicationStatusId", step1Status._id);
+    formData.append("jobStatusId", appliedJobStatus || job.status);
     formData.append("resume", file);
     formData.append("contactInfo", data.contactInfo);
     formData.append("emailInfo", data.emailInfo);

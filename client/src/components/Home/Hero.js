@@ -72,7 +72,7 @@ export const Hero = () => {
 
         // Update localStorage with new company info
         localStorage.setItem("companyUserName", companyUserName);
-        localStorage.setItem("companyId", companyFromApi._id);
+        localStorage.setItem("companyId", companyFromApi._id || companyFromApi.id);
 
         // Update state with company data
         setCompanyData(companyFromApi);

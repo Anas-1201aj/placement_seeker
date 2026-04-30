@@ -119,39 +119,21 @@ function App() {
       return;
     }
 
-    // If user is not logged in (companyUserName is not in localStorage)
-    if (!companyUserNameFromStorage) {
-      console.log('User not logged in. Redirecting to login...');
-      // Only redirect if it's not a known public route? But we handled ignoredSlugs above.
-      // So if slug is "some-company", and we are not logged in, we go to /some-company (login).
-      navigate(`/${slug}`);
-      return;
-    }
-
-    // If slug (companyUserName) from route does not match the one stored in localStorage
-    if (companyUserNameFromStorage !== slug) {
-      console.log('Company mismatch or invalid company user, redirecting...');
-      if (user) {
-        navigate('/404');
-        return;
-      }
-      navigate(`/${slug}`);
-      return;
-    }
-
+    // If company from route matches stored company, or if we have a slug, fetch/verify company details
+    // Only redirect if there's a mismatch or no stored session and we're not on the landing page for that company
+    
     setCompanyError(false);
 
-    // If we already have the companyId and Name matching, do we need to fetch again?
-    // Existing logic fetches.
     axios
       .get(`${BASE_URL}/companies/companies/${slug}`)
 
       .then(res => {
-        if (companyIdFromStorage && res.data._id !== companyIdFromStorage) {
+        const fetchedCompanyId = res.data._id || res.data.id;
+        if (companyIdFromStorage && fetchedCompanyId !== companyIdFromStorage) {
           console.error("Company ID mismatch, invalid access.");
           navigate('/404');
         } else {
-          localStorage.setItem("companyId", res.data._id);
+          localStorage.setItem("companyId", fetchedCompanyId);
           localStorage.setItem("companyUserName", slug);
           localStorage.setItem(`ai_features_${slug}`, res.data.aiFeaturesEnabled);
           localStorage.setItem(`only_ai_features_${slug}`, res.data.onlyAiFeaturesEnabled);
@@ -161,7 +143,7 @@ function App() {
         console.error("Invalid company slug:", err);
         setCompanyError(true);
       });
-  }, [slug, companyUserNameFromStorage, companyIdFromStorage, navigate]);
+  }, [slug, companyIdFromStorage, navigate]);
 
 
   useAuth();
