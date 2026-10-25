@@ -20,7 +20,8 @@ import {
 import ThemeToggle from "./ThemeToggle";
 
 const superNavItems = [
-  { label: "Users", path: "/all-users", icon: <Users className="hidden lg:block hidden lg:block w-5 h-5" /> },
+  { label: "Dashboard", path: "/dashboard", icon: <LayoutDashboard className="w-5 h-5" /> },
+  { label: "Users", path: "/all-users", icon: <Users className="hidden lg:block w-5 h-5" /> },
   { label: "Companies", path: "/all-companies", icon: <Building className="hidden lg:block w-5 h-5" /> }
 ];
 
@@ -124,9 +125,10 @@ export const Navbar = () => {
 
       setIsLoadingCompany(true);
       try {
-        const response = await fetch(
-          `${process.env.REACT_APP_BASE_URL}/companies/companies/${companyUserName}`
-        );
+        const baseUrl = process.env.REACT_APP_BASE_URL.endsWith('/') 
+          ? process.env.REACT_APP_BASE_URL.slice(0, -1) 
+          : process.env.REACT_APP_BASE_URL;
+        const response = await fetch(`${baseUrl}/companies/companies/${companyUserName}`);
 
         if (response.ok) {
           const data = await response.json();
@@ -175,36 +177,26 @@ export const Navbar = () => {
   }, []);
 
   useEffect(() => {
-    if (location.pathname === "/") {
-      setNavItems(loginData?.role === "super" ? superNavItems : []);
-    } else {
-      // Reapply the default or user role-based navigation items
-      if (loginData) {
-        switch (loginData.role) {
-          case "super":
-            setNavItems(superNavItems);
-            break;
-          case "admin":
-            setNavItems(adminNavItems);
-            break;
-          case "hiring_manager":
-            setNavItems(hiringManagerNavItems);
-            break;
-          case "interviewer":
-            setNavItems(interviewerNavItems);
-            break;
-          case "recruiter_manager":
-            setNavItems(recruiterNavItems);
-            break;
-          case "candidate":
-            setNavItems(candidateNavItems);
-            break;
-          default:
-            setNavItems(normalNavItem);
-        }
-      }
+    const publicPages = ["/", "/login", "/signup", "/reset-password"];
+    const isPublicPage = publicPages.includes(location.pathname);
+
+    if (isPublicPage) {
+      setNavItems([]);
+      return;
     }
-  }, [location, loginData]);
+
+    if (loginData?.role) {
+      const roleMaps = {
+        super: superNavItems,
+        admin: adminNavItems,
+        hiring_manager: hiringManagerNavItems,
+        interviewer: interviewerNavItems,
+        recruiter_manager: recruiterNavItems,
+        candidate: candidateNavItems
+      };
+      setNavItems(roleMaps[loginData.role] || normalNavItem);
+    }
+  }, [loginData, location.pathname]);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -230,7 +222,10 @@ export const Navbar = () => {
 
   const logoutHandler = async () => {
     try {
-      const res = await fetch(`${process.env.REACT_APP_BASE_URL}/auth/logout`, {
+      const baseUrl = process.env.REACT_APP_BASE_URL.endsWith('/') 
+          ? process.env.REACT_APP_BASE_URL.slice(0, -1) 
+          : process.env.REACT_APP_BASE_URL;
+      const res = await fetch(`${baseUrl}/auth/logout`, {
         method: "POST",
       })
       const result = await res.json()
@@ -270,13 +265,13 @@ export const Navbar = () => {
                 className="flex items-center gap-2 transition-transform duration-200 hover:scale-105"
               >
                 <img
-                  src={companyUserName && company?.image ? company.image : "/Invertis_University_logo.png"}
+                  src={companyUserName && company?.image ? company.image : "/job-offer.png"}
                   className="rounded-full h-9 md:h-7"
-                  alt="ATS Logo"
+                  alt=""
                 />
                 <span className="bg-gradient-to-r from-blue-300 via-purple-650 to-blue-700 bg-clip-text text-transparent ml-2 hidden sm:block">
                   <span className="font-extrabold text-xl md:text-2xl capitalize">
-                    {companyUserName ? company?.CompanyUserName?.toLowerCase() : "INVERTIS"}
+                    {companyUserName ? company?.CompanyUserName?.toLowerCase() : "Placement seeker"}
                   </span>
                 </span>
               </NavLink>
@@ -376,7 +371,7 @@ export const Navbar = () => {
               <div className="mr-5">
                 <ThemeToggle />
               </div>
-              {loginData ? (
+              {loginData && !(loginData.role === 'super' && ["/", "/login", "/signup", "/reset-password"].includes(location.pathname)) ? (
                 <div className="relative flex items-center space-x-4" ref={userDropdownRef}>
                   <button
                     onClick={toggleDropdown}
@@ -430,28 +425,24 @@ export const Navbar = () => {
                 </div>
               ) : (
                 <div className="flex items-center space-x-4">
-                  {location.pathname !== "/" && (
-                    <>
-                      <Link
-                        to={companyUserName ? `/${companyUserName}/login` : "/login"}
-                        className={`px-4 py-2 text-sm font-medium rounded-xl focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all duration-200 ${theme === "dark"
-                          ? "text-white bg-gray-800 hover:bg-gray-700 hover:border hover:border-gray-700 focus:ring-gray-700"
-                          : "text-gray-700 bg-white border border-gray-200 hover:bg-gray-50 hover:border-gray-300 focus:ring-purple-500"
-                          }`}
-                      >
-                        Login
-                      </Link>
-                      <Link
-                        to={companyUserName ? `/${companyUserName}/signup` : "/signup"}
-                        className={`px-4 py-2 text-sm font-medium rounded-xl focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all duration-200 ${theme === "dark"
-                          ? "text-white bg-gray-800 hover:bg-gray-700 hover:border hover:border-gray-700 focus:ring-gray-700"
-                          : "text-white bg-purple-600 hover:bg-purple-700 focus:ring-purple-500"
-                          }`}
-                      >
-                        Sign Up
-                      </Link>
-                    </>
-                  )}
+                  <Link
+                    to={companyUserName ? `/${companyUserName}/login` : "/login"}
+                    className={`px-4 py-2 text-sm font-medium rounded-xl focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all duration-200 ${theme === "dark"
+                      ? "text-white bg-gray-800 hover:bg-gray-700 hover:border hover:border-gray-700 focus:ring-gray-700"
+                      : "text-gray-700 bg-white border border-gray-200 hover:bg-gray-50 hover:border-gray-300 focus:ring-purple-500"
+                      }`}
+                  >
+                    Login
+                  </Link>
+                  <Link
+                    to={companyUserName ? `/${companyUserName}/signup` : "/signup"}
+                    className={`px-4 py-2 text-sm font-medium rounded-xl focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all duration-200 ${theme === "dark"
+                      ? "text-white bg-gray-800 hover:bg-gray-700 hover:border hover:border-gray-700 focus:ring-gray-700"
+                      : "text-white bg-purple-600 hover:bg-purple-700 focus:ring-purple-500"
+                      }`}
+                  >
+                    Sign Up
+                  </Link>
                 </div>
 
               )}
@@ -599,7 +590,7 @@ export const Navbar = () => {
                   </div>
                 </div>
 
-                {loginData ? (
+                {loginData && !(loginData.role === 'super' && ["/", "/login", "/signup", "/reset-password"].includes(location.pathname)) ? (
                   <div className="space-y-4">
                     <div className="flex items-center gap-3 p-3 rounded-2xl bg-white/5 border border-white/10">
                       <div className="h-10 w-10 rounded-full bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center text-white font-bold">
@@ -614,8 +605,8 @@ export const Navbar = () => {
                     </div>
 
                     <div className="grid grid-cols-2 gap-2">
-                      <Link
-                        to={`/${companyUserName}/profile`}
+                       <Link
+                        to={companyUserName ? `/${companyUserName}/profile` : "/profile"}
                         onClick={() => setIsMenuOpen(false)}
                         className={`flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold transition-all ${theme === "dark"
                           ? "bg-gray-800 text-white hover:bg-gray-700"

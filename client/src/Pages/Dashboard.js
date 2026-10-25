@@ -4,6 +4,7 @@ import Stats from "../components/Stats";
 import BarChart from "../components/BarChart";
 import LineChart from "../components/LineChart";
 import { useTheme } from "../context/ThemeContext";
+import SuperAdminDashboard from "./SuperAdmin/SuperAdminDashboard";
 
 export default function Dashboard() {
   const { theme } = useTheme();
@@ -345,6 +346,13 @@ export default function Dashboard() {
   // Ensure jobStatuses is always an array
   const safeJobStatuses = Array.isArray(jobStatuses) ? jobStatuses : [];
   const safeJobs = Array.isArray(jobs) ? jobs : [];
+
+  const user = JSON.parse(localStorage.getItem('user') || '{}');
+  const isSuperAdmin = user.role === 'super';
+
+  if (isSuperAdmin) {
+    return <SuperAdminDashboard />;
+  }
 
   return (
     <div className={`min-h-screen p-6 transition-colors duration-300 ${theme === "dark" ? "bg-black" : "bg-gradient-to-br from-purple-300 via-blue-100 to-indigo-200"

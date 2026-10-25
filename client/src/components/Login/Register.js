@@ -113,8 +113,8 @@ export const Register = () => {
         <div className="text-center mb-8">
           <div className="mx-auto mb-2 flex items-center justify-center rounded-full p-1">
             <img
-              src="/ATSLOGO.png"
-              alt="ATS Logo"
+              src="/job-offer.png"
+              alt="Placement seeker Logo"
               className="h-20 w-20 object-cover rounded-full"
             />
           </div>
@@ -147,7 +147,7 @@ export const Register = () => {
               name="userName"
               value={formData.userName}
               onChange={handleChange}
-              placeholder="Ex: Abhishek Sharma"
+              placeholder="Ex: Anas Javed"
               className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all ${theme === 'dark'
                 ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400'
                 : 'bg-gray-50 border-gray-200 text-gray-900 placeholder-gray-400'
@@ -165,7 +165,7 @@ export const Register = () => {
               name="email"
               value={formData.email}
               onChange={handleChange}
-              placeholder="Ex: abhisheksharma@gmail.com"
+              placeholder="Ex: anasjaved@gmail.com"
               autoComplete="off"
               className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all ${theme === 'dark'
                 ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400'

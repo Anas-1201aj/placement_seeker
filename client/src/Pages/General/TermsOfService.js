@@ -18,12 +18,12 @@ const TermsOfService = () => {
 
                     <section>
                         <h2 className="text-2xl font-semibold mb-3">2. Use License</h2>
-                        <p>Permission is granted to temporarily download one copy of the materials (information or software) on Invertis's website for personal, non-commercial transitory viewing only.</p>
+                        <p>Permission is granted to temporarily download one copy of the materials (information or software) on Placement seeker's website for personal, non-commercial transitory viewing only.</p>
                     </section>
 
                     <section>
                         <h2 className="text-2xl font-semibold mb-3">3. Disclaimer</h2>
-                        <p>The materials on Invertis's website are provided on an 'as is' basis. Invertis makes no warranties, expressed or implied, and hereby disclaims and negates all other warranties.</p>
+                        <p>The materials on Placement seeker's website are provided on an 'as is' basis. Placement seeker makes no warranties, expressed or implied, and hereby disclaims and negates all other warranties.</p>
                     </section>
                 </div>
             </div>

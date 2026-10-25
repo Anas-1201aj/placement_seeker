@@ -102,6 +102,8 @@ const LocationPicker = ({
   locationType,
   register,
   setValue,
+  title,
+  generateTitleCode,
 }) => {
   const countries = Country.getAllCountries();
 
@@ -366,10 +368,17 @@ export const PostJobForm = ({
       { value: "30 mins", label: "30 mins" },
     ],
     interviewTypes:
-      interviewRounds?.map((round) => ({
-        value: round._id,
-        label: round.roundName,
-      })) || [],
+      interviewRounds && interviewRounds.length > 0
+        ? interviewRounds.map((round) => ({
+            value: round._id || round.roundName,
+            label: round.roundName,
+          }))
+        : [
+            { value: "Basic Screening", label: "Basic Screening" },
+            { value: "Technical Round", label: "Technical Round" },
+            { value: "HR Round", label: "HR Round" },
+            { value: "AI Screening", label: "AI Screening" },
+          ],
   };
 
   const handleGenerateDescription = async () => {
@@ -410,7 +419,7 @@ export const PostJobForm = ({
 
       if (!response.ok) {
         const data = await response.json().catch(() => ({}));
-        throw new Error(data.message || "Failed to generate description");
+        throw new Error(data.error || data.message || "Failed to generate description");
       }
 
       const reader = response.body.getReader();
@@ -465,16 +474,16 @@ export const PostJobForm = ({
     const fetchExistingJobs = async () => {
       try {
         const response = await fetch(
-          `${process.env.REACT_APP_BASE_URL}/jobs/all-jobs`,
+          `${process.env.REACT_APP_BASE_URL}/jobs/get-all-jobs`,
           {
             headers: {
               company_id: companyId,
             },
-          },
+          }
         );
-        const data = await response.json();
-        if (data.success) {
-          setExistingJobs(data.jobs);
+        if (response.ok) {
+          const data = await response.json();
+          setExistingJobs(data.jobs || []);
         }
       } catch (error) {
         console.error("Error fetching existing jobs:", error);
@@ -484,26 +493,29 @@ export const PostJobForm = ({
     fetchExistingJobs();
   }, [companyId]);
 
+
   useEffect(() => {
     const fetchRecruiters = async () => {
       try {
         const response = await fetch(
-          `${process.env.REACT_APP_BASE_URL}/recruiter/all-recruiter`,
+          `${process.env.REACT_APP_BASE_URL}/recruiter/get-all-recruiters`,
           {
             headers: {
               company_id: companyId,
             },
-          },
+          }
         );
-        const data = await response.json();
-        setRecruitersList(data);
+        if (response.ok) {
+          const data = await response.json();
+          setRecruitersList(data.recruiters || []);
+        }
       } catch (error) {
         console.error("Error fetching recruiters:", error);
       }
     };
 
     fetchRecruiters();
-  }, []);
+  }, [companyId]);
 
   useEffect(() => {
     const fetchJobStatuses = async () => {
@@ -511,7 +523,7 @@ export const PostJobForm = ({
       setStatusError(null);
       try {
         const response = await fetch(
-          `${process.env.REACT_APP_BASE_URL}/job-statuses/all-job-statuses`,
+          `${process.env.REACT_APP_BASE_URL}/job-statuses/all-job-statuses?limit=1000`,
           {
             headers: {
               company_id: companyId,
@@ -524,8 +536,6 @@ export const PostJobForm = ({
         }
 
         const data = await response.json();
-        console.log("Job Statuses API Response:", data);
-
         if (data.jobStatuses && Array.isArray(data.jobStatuses)) {
           setJobStatuses(data.jobStatuses);
         } else {
@@ -543,19 +553,24 @@ export const PostJobForm = ({
     fetchJobStatuses();
   }, [companyId]);
 
-  const statusOptions = Array.isArray(jobStatuses)
+  const DEFAULT_STATUS_FALLBACKS = [
+    { value: "Open", label: "Open" },
+    { value: "In Progress", label: "In Progress" },
+    { value: "On Hold", label: "On Hold" },
+    { value: "Closed", label: "Closed" }
+  ];
+
+  const statusOptions = Array.isArray(jobStatuses) && jobStatuses.length > 0
     ? jobStatuses
       .sort((a, b) => parseInt(a.jobStep) - parseInt(b.jobStep))
       .map((status) => ({
-        value: status._id,
+        value: status._id || status.jobStatus,
         label: status.jobStatus,
       }))
-    : [];
+    : DEFAULT_STATUS_FALLBACKS;
 
-  // Enhanced onSubmit to handle title code
   const enhancedOnSubmit = async (data) => {
     try {
-      // Add title code to data if it's a new job
       if (!jobToEdit) {
         data.titleCode = titleCode;
       }

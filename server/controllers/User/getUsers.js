@@ -18,10 +18,10 @@ const getUsers = async (req, res) => {
 
     // If role is provided (e.g., role=admin for super users), add a filter.
     if (role) {
-      query.role = role;
+      query.role = Array.isArray(role) ? { $in: role } : role;
     }
-    if (company_id) {
-      query.company_id = company_id
+    if (company_id && company_id !== 'super') {
+      query.company_id = company_id;
     }
 
     const totalCount = await User.countDocuments(query);

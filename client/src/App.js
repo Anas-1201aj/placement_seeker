@@ -80,7 +80,7 @@ function App() {
   const { theme } = useTheme();
 
   // Pages that should be accessible without being treated as a company slug
-  const ignoredSlugs = ['about', 'contact', 'privacy', 'terms', 'blog', 'documentation', 'support', 'guides', 'jobs', 'login', 'signup', 'reset-password', 'all-users', 'all-companies', 'profile', '404'];
+  const ignoredSlugs = ['dashboard', 'about', 'contact', 'privacy', 'terms', 'blog', 'documentation', 'support', 'guides', 'jobs', 'login', 'signup', 'reset-password', 'all-users', 'all-companies', 'profile', '404'];
 
 
   const slug = location.pathname.split('/')[1];
@@ -97,25 +97,31 @@ function App() {
     // If we are at /, slug is undefined.
 
     if (!slug || ignoredSlugs.includes(slug)) {
+
       // If it is an ignored slug, we might still want to clear company data if we navigated AWAY from a company?
       // But if we are just viewing a public page, maybe we keep the session?
       // Let's stick to existing behavior but respect ignored slugs.
       // Actually, existing behavior clears if !slug.
-      if (!slug) {
-        if (user) {
-          navigate(`/${companyIdFromStorage}`);
-          return;
+      if (!slug || slug === 'login' || slug === 'signup') {
+        if (!slug && user) {
+          const userData = JSON.parse(user);
+          if (userData.role !== 'super') {
+            if (companyUserNameFromStorage) {
+              navigate(`/${companyUserNameFromStorage}`);
+              return;
+            }
+          }
         }
         localStorage.removeItem("companyUserName");
         localStorage.removeItem("companyId");
-        console.log("Cleared companyUserName from localStorage");
+        console.log("Cleared company context");
       }
     }
   }, [slug]);
 
 
   useEffect(() => {
-    if (ignoredSlugs.includes(slug)) {
+    if (ignoredSlugs.includes(slug) || !slug) {
       return;
     }
 
@@ -189,9 +195,11 @@ function App() {
           <Route path="/reset-password" element={<ResetPassword />} />
 
           <Route path="/:companyUserName/signup" element={<Register />} />
+          <Route path="/signup" element={<Register />} />
           {/* <Route path="/:companyUserName?/signup" element={ <Register /> } /> */}
 
           {/* Dashboard */}
+          <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/:companyUserName/dashboard" element={<Dashboard />} />
           <Route path="/:companyUserName/profile" element={<Profile />} />
           <Route path="/profile" element={<Profile />} />

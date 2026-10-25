@@ -1,5 +1,6 @@
 import React from "react";
 import { useTheme } from "../../context/ThemeContext";
+import { Link } from "react-router-dom";
 
 const Cta = React.forwardRef((_props, ref) => {
     const { theme } = useTheme();
@@ -22,12 +23,14 @@ const Cta = React.forwardRef((_props, ref) => {
                         platform.
                     </p>
                     <div className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4 w-full">
-                        <button className={`font-semibold py-3 px-4 sm:px-8 rounded-full transition-all duration-300 shadow-lg shadow-indigo-600/30 w-full sm:w-auto ${theme === "dark"
-                            ? "bg-white hover:bg-gray-200 text-purple-900"
-                            : "bg-purple-600 hover:bg-purple-700 text-white"
-                            }`}>
-                            Get Started for Free
-                        </button>
+                        <Link to="/login" className="w-full sm:w-auto">
+                            <button className={`font-semibold py-3 px-4 sm:px-8 rounded-full transition-all duration-300 shadow-lg shadow-indigo-600/30 w-full sm:w-auto ${theme === "dark"
+                                ? "bg-white hover:bg-gray-200 text-purple-900"
+                                : "bg-purple-600 hover:bg-purple-700 text-white"
+                                }`}>
+                                Get Started for Free
+                            </button>
+                        </Link>
                         <button className={`py-3 px-4 sm:px-8 rounded-full font-medium backdrop-blur-sm transition-all duration-300 w-full sm:w-auto border ${theme === "dark"
                             ? "bg-white/10 border-white hover:bg-white/20 text-white"
                             : "bg-white border-purple-200 hover:bg-purple-50 text-purple-600"

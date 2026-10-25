@@ -18,13 +18,15 @@ const fetchUsers = async ({ queryKey }) => {
     url += `&role=${role}`;
   }
   // Retrieve company_id from localStorage
-  const companyId = JSON.parse(localStorage.getItem("user")).company_id;
-  console.log("companyId",companyId);
+  // Retrieve user from localStorage
+  const user = JSON.parse(localStorage.getItem("user"));
+  const companyId = user?.company_id;
+  const isSuper = user?.role === 'super';
 
   const res = await axios.get(url, {
-    headers: {
-      'Company_id': companyId  // Sending company_id in headers
-    }
+    headers: !isSuper && companyId ? {
+      'Company_id': companyId
+    } : {}
   });
 
   return res.data;
@@ -82,12 +84,16 @@ export const useUpdateUser = () => {
 
 // { * 4. DELETE USER}
 const deleteUser = async ( userId ) => {
+  const user = JSON.parse(localStorage.getItem("user"));
+  const companyId = user?.company_id;
+  const isSuper = user?.role === 'super';
+
   await axios.delete(
     `${ process.env.REACT_APP_BASE_URL }/users/delete-user/${ userId }`,
     {
-      headers: {
-        'Company_id': JSON.parse( localStorage.getItem( "user" ) ).company_id
-      }
+      headers: !isSuper && companyId ? {
+        'Company_id': companyId
+      } : {}
     }
   );
 };

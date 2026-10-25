@@ -84,7 +84,7 @@ const AllPostedJobs = () => {
         const companyId = companyDetails?._id;
         if (!companyId) return;
 
-        const response = await fetch(`${process.env.REACT_APP_BASE_URL}/job-statuses/all-job-statuses`, {
+        const response = await fetch(`${process.env.REACT_APP_BASE_URL}/job-statuses/alljobStatuses`, {
           headers: {
             "Company_id": companyId
           }

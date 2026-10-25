@@ -28,7 +28,7 @@ const UserListing = () => {
     page: currentPage,
     limit: 9,
     search,
-    role: loggedInUser.role === 'super' ? "admin" : null
+    role: loggedInUser.role === 'super' ? ["admin", "super"] : null
   });
 
   const { mutate: addUser } = useAddUser();

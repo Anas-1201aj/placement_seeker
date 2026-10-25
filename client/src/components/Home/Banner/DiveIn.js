@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion } from "framer-motion";
 import { ArrowRight, Phone, Sparkles } from "lucide-react";
+import { Link } from "react-router-dom";
 
 export default function ReadytoDiv() {
     return (
@@ -60,14 +61,16 @@ export default function ReadytoDiv() {
                             transition={{ delay: 0.5 }}
                             className="flex flex-col sm:flex-row items-center justify-center gap-6 mb-12"
                         >
-                            <motion.button
-                                whileHover={{ scale: 1.05, boxShadow: "0 20px 40px -10px rgba(168,85,247,0.4)" }}
-                                whileTap={{ scale: 0.95 }}
-                                className="w-full sm:w-auto px-10 py-5 bg-white text-gray-900 font-black rounded-2xl hover:bg-gray-100 transition-all flex items-center justify-center gap-2 group"
-                            >
-                                Get Started Now
-                                <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
-                            </motion.button>
+                            <Link to="/login" className="w-full sm:w-auto">
+                                <motion.button
+                                    whileHover={{ scale: 1.05, boxShadow: "0 20px 40px -10px rgba(168,85,247,0.4)" }}
+                                    whileTap={{ scale: 0.95 }}
+                                    className="w-full sm:w-auto px-10 py-5 bg-white text-gray-900 font-black rounded-2xl hover:bg-gray-100 transition-all flex items-center justify-center gap-2 group"
+                                >
+                                    Get Started Now
+                                    <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                                </motion.button>
+                            </Link>
 
                             <motion.a
                                 href="#learn-more"

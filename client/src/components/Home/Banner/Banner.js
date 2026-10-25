@@ -1,5 +1,5 @@
 import HeroSectionAts from './HeroSectionAts'
-import CampusCarousel from './CampusCarousel';
+// import CampusCarousel from './CampusCarousel';
 import Companies from './Companies';
 import About from './About';
 import WhyAts from './Why';
@@ -18,7 +18,7 @@ const Banner = () => {
 
       <div className="relative z-10 scroll-smooth">
         <HeroSectionAts />
-        <CampusCarousel />
+        {/* <CampusCarousel /> */}
         <Companies />
         <WhyAts />
         {/* <About /> */}

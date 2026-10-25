@@ -57,12 +57,17 @@ export const Login = () => {
         }
 
         if (result.user.role !== "super") {
+          const redirectSlug = result.companyUserName || companyUserName;
+          if (redirectSlug) {
+            localStorage.setItem("companyUserName", redirectSlug);
+            localStorage.setItem("companyId", result.user.company_id);
+          }
           setTimeout(() => {
-            window.location.href = `/${companyUserName}`;
+            window.location.href = `/${redirectSlug || ""}`;
           }, 1500);
         } else {
           setTimeout(() => {
-            window.location.href = `/`;
+            window.location.href = `/dashboard`;
           }, 1500);
         }
       } else {

@@ -45,18 +45,23 @@ export const generateJobDescription = async (req, res) => {
             error.message?.includes('Too Many Requests') ||
             error.message?.includes('Resource exhausted');
 
-        if (isRateLimitError) {
-            return res.status(429).json({
+        if (!res.headersSent) {
+            if (isRateLimitError) {
+                return res.status(429).json({
+                    success: false,
+                    message: "Rate limit exceeded. Please try again in a few moments.",
+                    error: error.message
+                });
+            }
+
+            res.status(500).json({
                 success: false,
-                message: "Rate limit exceeded. Please try again in a few moments.",
+                message: "Failed to generate description",
                 error: error.message
             });
+        } else {
+            res.write(`\n\n[Error generating description: ${error.message}]`);
+            res.end();
         }
-
-        res.status(500).json({
-            success: false,
-            message: "Failed to generate description",
-            error: error.message
-        });
     }
 };
