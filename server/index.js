@@ -66,7 +66,7 @@ app.use("/interviewerfeedback", feedbackRoutes);
 
 // Routes
 app.get("/", (req, res) => {
-  res.json({ message: "Hello, wowo" });
+  res.json({ message: "Hello, anas" });
 });
 
 app.get("*", (req, res) => {
