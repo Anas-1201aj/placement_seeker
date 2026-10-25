@@ -7,7 +7,7 @@ const allRecruiter = async ( req, res ) => {
         if ( !companyId ) {
             return res.status( 400 ).json( { message: 'company_id is required' } );
         }
-        const recruiter = await User.find( { role: 'recruiter_manager', head: false, company_id: companyId } );
+        const recruiter = await User.find( { role: 'recruiter_manager', company_id: companyId } );
         res.status( 200 ).json( recruiter );
     } catch ( error ) {
         res.status( 500 ).json( { message: 'Server error' } );

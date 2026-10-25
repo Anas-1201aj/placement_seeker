@@ -15,7 +15,7 @@ const Jobs = () => {
                         <Briefcase className="w-10 h-10" />
                     </div>
                     <h2 className="text-2xl font-semibold mb-2">Browse Opportunities</h2>
-                    <p className="text-lg opacity-70 mb-6">Find your dream job with Invertis. Explore thousands of open roles tailored to your skills.</p>
+                    <p className="text-lg opacity-70 mb-6">Find your dream job with Placement seeker. Explore thousands of open roles tailored to your skills.</p>
                     {/* Potentially redirect to the actual job listing app if it exists, or just a placeholder for now */}
                     <p className="text-sm text-gray-500">Redirecting to job board...</p>
                 </div>

@@ -187,12 +187,16 @@ export const PostJob = () => {
     let interviewTypeData = null;
     if (interviewMode === "AI" && data.interviewType) {
       const selectedRound = interviewRounds.find(
-        (round) => round._id === data.interviewType,
+        (round) => round._id === data.interviewType || round.roundName === data.interviewType,
       );
       if (selectedRound) {
         interviewTypeData = {
           roundId: selectedRound._id,
           roundName: selectedRound.roundName,
+        };
+      } else {
+        interviewTypeData = {
+          roundName: data.interviewType,
         };
       }
     }
@@ -241,8 +245,8 @@ export const PostJob = () => {
           toast.success("Job posted successfully");
           navigate(`/${companyUserName}/all-jobs`);
         },
-        onError: () => {
-          toast.error("Failed to post job");
+        onError: (error) => {
+          toast.error(error.message || "Failed to post job");
         },
       });
     }

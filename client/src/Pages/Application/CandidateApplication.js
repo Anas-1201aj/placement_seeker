@@ -20,6 +20,7 @@ const CandidateApplication = () => {
         hireType: '',
         locationType: '',
         company_id: "",
+        aiSelected: localStorage.getItem(`only_ai_features_${localStorage.getItem("companyUserName")}`) === 'true'
     });
 
     const companyId = JSON.parse(localStorage.getItem("user")).company_id;
@@ -553,8 +554,8 @@ const CandidateApplication = () => {
                                                     <div className={`text-sm font-medium group-hover:text-white ${theme === 'dark' ? 'text-gray-300' : 'text-gray-900'}`}>{job.scheduleType || 'N/A'}</div>
                                                 </td>
                                                 <td className="px-3 md:px-5 lg:px-6 py-5 whitespace-nowrap text-center">
-                                                    <div className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusBadge(job.applicationCount)}`}>
-                                                        {job.applicationCount}
+                                                    <div className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusBadge(job.applicationCount || 0)}`}>
+                                                        {job.applicationCount || 0}
                                                     </div>
                                                 </td>
                                                 <td className="px-3 md:px-5 lg:px-6 py-5 whitespace-nowrap text-sm group-hover:text-white">

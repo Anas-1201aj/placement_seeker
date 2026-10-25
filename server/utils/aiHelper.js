@@ -92,25 +92,95 @@ const getPrompt = (jobTitle, capitalizedCompany, experience, compensation) => {
             Failure to follow this will break the UI formatting.`;
 };
 
+const getFallbackDescription = (jobTitle, capitalizedCompany, experience, compensation) => {
+    const compText = compensation ? ` (${compensation})` : "";
+    const expText = experience ? `${experience} years` : "relevant";
+    const companyName = capitalizedCompany || "Our Company";
+    
+    return `<h3>🚀 About the Company</h3>
+<p>At <strong style="background-color: yellow; color: #000000; padding: 2px 4px; border-radius: 4px;">${companyName}</strong>, we are dedicated to fostering innovation, excellence, and career growth. We empower team members to bring their best ideas to life in a dynamic and collaborative environment.</p>
+<br></br>
+<h3>👨💻 Role Overview</h3>
+<p>We are seeking a talented and motivated <strong>${jobTitle}</strong> to join our growing team. The ideal candidate should bring approximately <strong>${expText}</strong> of hands-on experience, strong problem-solving capabilities, and a drive to excel in a fast-paced environment.</p>
+<br></br>
+<h3>🛠️ Key Responsibilities</h3>
+<ul>
+    <li>Lead and execute strategic projects related to ${jobTitle} workflows.</li>
+    <li>Collaborate cross-functionally with team members and stakeholders to deliver high-quality solutions.</li>
+    <li>Identify process improvements and best practices to drive operational efficiency.</li>
+    <li>Analyze requirements, design robust solutions, and ensure successful end-to-end execution.</li>
+    <li>Provide technical guidance, quality assurance, and continuous optimization.</li>
+</ul>
+<br></br>
+<h3>🎯 Required Skills & Qualifications</h3>
+<ul>
+    <li>Minimum of <strong>${expText}</strong> of relevant industry experience as a ${jobTitle} or similar role.</li>
+    <li>Proven technical expertise and strong analytical problem-solving skills.</li>
+    <li>Excellent communication, teamwork, and interpersonal skills.</li>
+    <li>Ability to manage multiple priorities and deliver results within agreed timelines.</li>
+    <li>Bachelor's degree in a relevant field or equivalent practical experience.</li>
+</ul>
+<br></br>
+<h3>🌟 What We Offer</h3>
+<ul>
+    <li>Competitive salary package${compText} 💰</li>
+    <li>Friendly, inclusive, and supportive work culture 🤝</li>
+    <li>Career growth, mentorship, and continuous learning opportunities 📈</li>
+    <li>Flexible working environment and modern tech stack 🚀</li>
+</ul>`;
+};
+
+async function* createFallbackStream(jobTitle, companyUserName, compensation, experience) {
+    const htmlText = getFallbackDescription(jobTitle, companyUserName, experience, compensation);
+    const chunkSize = 40;
+    for (let i = 0; i < htmlText.length; i += chunkSize) {
+        const piece = htmlText.substring(i, i + chunkSize);
+        yield { text: () => piece };
+        await sleep(30);
+    }
+}
+
 export const generateDescriptionStream = async (jobTitle, companyUserName, compensation = "", experience = "") => {
     try {
         if (!jobTitle) throw new Error("Job title is required");
-        if (!process.env.GEMINI_API_KEY) throw new Error("Gemini API key not configured");
+        const apiKey = (process.env.GEMINI_API_KEY || "").trim();
 
         const capitalizedCompany = companyUserName
             ? companyUserName.charAt(0).toUpperCase() + companyUserName.slice(1)
             : "";
 
-        return await retryWithBackoff(async () => {
-            const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-            const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
-            const prompt = getPrompt(jobTitle, capitalizedCompany, experience, compensation);
-            const result = await model.generateContentStream(prompt);
-            return result.stream;
-        }, 3, 2000);
+        if (apiKey) {
+            try {
+                return await retryWithBackoff(async () => {
+                    const genAI = new GoogleGenerativeAI(apiKey);
+                    const prompt = getPrompt(jobTitle, capitalizedCompany, experience, compensation);
+
+                    const modelsToTry = ["gemini-1.5-flash", "gemini-1.5-pro", "gemini-2.0-flash"];
+                    let lastError = null;
+
+                    for (const modelName of modelsToTry) {
+                        try {
+                            const model = genAI.getGenerativeModel({ model: modelName });
+                            const result = await model.generateContentStream(prompt);
+                            return result.stream;
+                        } catch (err) {
+                            console.warn(`Model ${modelName} failed for streaming job description:`, err.message);
+                            lastError = err;
+                        }
+                    }
+
+                    throw lastError || new Error("Failed to generate content with available Gemini models");
+                }, 2, 1000);
+            } catch (aiError) {
+                console.warn("⚠️ Gemini AI stream error, falling back to template generator:", aiError.message);
+            }
+        }
+
+        // Fall back to template stream if Gemini API is unconfigured, rate-limited, or failed
+        return createFallbackStream(jobTitle, capitalizedCompany, compensation, experience);
     } catch (error) {
         console.error("Error in generateDescriptionStream:", error);
-        throw error;
+        return createFallbackStream(jobTitle, companyUserName, compensation, experience);
     }
 };
 

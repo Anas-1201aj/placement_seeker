@@ -67,7 +67,7 @@ export function Footer() {
                                 <span className="text-white font-bold text-lg">I</span>
                             </div>
                             <span className="font-bold text-2xl bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
-                                Invertis
+                                Placement seeker
                             </span>
                         </Link>
                         <p className={`mb-6 max-w-md ${theme === "dark" ? "text-slate-200" : "text-gray-600"}`}>
@@ -77,11 +77,11 @@ export function Footer() {
                         <div className="space-y-3">
                             <div className={`flex items-center gap-2 ${theme === "dark" ? "text-slate-200" : "text-gray-600"}`}>
                                 <Phone className="h-4 w-4 shrink-0" />
-                                <span className="text-sm">+91 96909 55599</span>
+                                <span className="text-sm">+91 9045386958</span>
                             </div>
                             <div className={`flex items-start gap-2 ${theme === "dark" ? "text-slate-200" : "text-gray-600"}`}>
                                 <MapPin className="h-4 w-4 mt-1 shrink-0" />
-                                <span className="text-sm">Rajau Paraspur, National Highway NH 30, Bareilly, Lucknow, Uttar Pradesh 243123, India</span>
+                                <span className="text-sm">Lalpul, Badaun, Uttar Pradesh 243601, India</span>
                             </div>
                         </div>
                     </div>
@@ -151,7 +151,7 @@ export function Footer() {
                 {/* Bottom Section */}
                 <div className={`mt-12 pt-8 flex flex-col md:flex-row justify-between items-center border-t ${theme === "dark" ? "border-white/10" : "border-gray-200"
                     }`}>
-                    <p className={`text-sm ${theme === "dark" ? "text-slate-200" : "text-gray-600"}`}>© {new Date().getFullYear()} Invertis. All rights reserved.</p>
+                    <p className={`text-sm ${theme === "dark" ? "text-slate-200" : "text-gray-600"}`}>© {new Date().getFullYear()} Placement seeker. All rights reserved.</p>
                     <div className="flex gap-4 mt-4 md:mt-0">
                         {navigation.social.map((item) => (
                             <a key={item.name} href={item.href} className={`transition-colors ${theme === "dark" ? "text-slate-200 hover:text-gray-400" : "text-gray-500 hover:text-purple-600"

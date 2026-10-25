@@ -36,35 +36,35 @@ const addJob = async (req, res) => {
 
     // ✅ Only call AI API if interviewMode is "AI"
     if (interviewMode === "AI") {
-      console.log("🔥 Calling AI generate-questions API...");
+      try {
+        console.log("🔥 Calling AI generate-questions API...");
+        const aiResponse = await fetch(
+          `${process.env.ASTRANYX_AI}/api/generate-questions`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              jobPosition: title,
+              jobDescription: description,
+              duration: parseInt(interviewDuration) || 15,
+              type: interviewType?.roundName || "General",
+              company_id: company_id.toString(),
+            }),
+          }
+        );
 
-      const aiResponse = await fetch(
-        `${process.env.ASTRANYX_AI}/api/generate-questions`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            jobPosition: title,
-            jobDescription: description,
-            duration: interviewDuration,
-            type: interviewType?.roundName || "",
-            company_id,
-          }),
+        if (aiResponse.ok) {
+          const aiData = await aiResponse.json();
+          interview_id = aiData.interview_id;
+          console.log("✅ AI Interview generated:", interview_id);
+        } else {
+          console.warn("⚠️ AI API failed but continuing job posting...");
         }
-      );
-
-      if (!aiResponse.ok) {
-        const errorText = await aiResponse.text();
-        throw new Error(`AI API failed: ${errorText}`);
-      }
-
-      const aiData = await aiResponse.json();
-      interview_id = aiData.interview_id;
-
-      if (!interview_id) {
-        throw new Error("Interview generation failed");
+      } catch (aiError) {
+        console.error("❌ AI Interview generation error:", aiError);
+        // We continue so the job can still be posted
       }
     }
 

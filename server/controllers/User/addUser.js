@@ -11,7 +11,7 @@ const addUser = async (req, res) => {
         }
 
         // Validate role field against allowed enum values
-        const allowedRoles = ["admin", "recruiter_manager", "hiring_manager", "interviewer", "candidate"];
+        const allowedRoles = ["super", "admin", "recruiter_manager", "hiring_manager", "interviewer", "candidate"];
         if (role && !allowedRoles.includes(role)) {
             return res.status(400).json({ message: "Invalid role specified." });
         }

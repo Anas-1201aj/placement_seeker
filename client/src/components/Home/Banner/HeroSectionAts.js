@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { ArrowRight, Users, Briefcase, Bot, Sparkles, CheckCircle2, TrendingUp } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import{ Link }from "react-router-dom"; // Adjust the import path based on your project structure
 
 const usps = [
     "AI-Powered Recruitment",
@@ -39,7 +40,7 @@ export default function Hero() {
             {/* Background Image */}
             <div 
                 className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat"
-                style={{ backgroundImage: "url('/building-bg.png')" }}
+                style={{ backgroundImage: "url('/background.jpg')" }}
             >
                 <div className="absolute inset-0 bg-black/50 dark:bg-black/60 backdrop-blur-sm"></div>
             </div>
@@ -54,7 +55,7 @@ export default function Hero() {
                 <motion.div variants={itemVariants} className="inline-flex items-center gap-2 rounded-full bg-white/10 border border-white/20 px-4 py-2 mb-8 backdrop-blur-md">
                     <Sparkles className="h-4 w-4 text-purple-300 animate-pulse" />
                     <span className="text-sm font-semibold text-purple-100 uppercase tracking-wider drop-shadow-sm">
-                        Invertis Recruitment Platform
+                        Placement seeker Recruitment Platform
                     </span>
                 </motion.div>
 
@@ -62,7 +63,7 @@ export default function Hero() {
                 <motion.h1 variants={itemVariants} className="text-5xl font-extrabold tracking-tight text-white drop-shadow-md sm:text-6xl lg:text-8xl mb-8">
                     Welcome to <br className="sm:hidden" />
                     <span className="bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-800 bg-clip-text text-transparent">
-                        Invertis
+                        Placement seeker
                     </span>
                     <div className="h-[1.2em] relative mt-2 overflow-hidden">
                         <AnimatePresence mode="wait">
@@ -87,16 +88,14 @@ export default function Hero() {
 
                 {/* CTA Buttons */}
                 <motion.div variants={itemVariants} className="flex flex-col sm:flex-row items-center justify-center gap-6">
-                    <motion.a
-                        href="/"
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
+                    <Link
+                        to="/login"
                         className="group relative inline-flex items-center justify-center px-10 py-4 font-bold rounded-2xl bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-[0_10px_20px_-10px_rgba(124,58,237,0.5)] hover:shadow-[0_20px_40px_-15px_rgba(124,58,237,0.6)] transition-all overflow-hidden"
                     >
                         <span className="relative z-10">Get Started</span>
                         <ArrowRight className="relative z-10 ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
                         <div className="absolute inset-0 bg-gradient-to-r from-indigo-600 to-purple-600 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                    </motion.a>
+                    </Link>
 
                     <motion.a
                         href="/"

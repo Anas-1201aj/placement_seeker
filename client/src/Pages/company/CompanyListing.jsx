@@ -230,7 +230,23 @@ const CompanyListing = () => {
   // Handle input changes in the form
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
+    
+    setFormData((prev) => {
+      const newData = { ...prev, [name]: type === 'checkbox' ? checked : value };
+      
+      // Enforce dependencies:
+      // 1. If "Restrict to AI" is checked, "Enable AI" must also be checked
+      if (name === 'onlyAiFeaturesEnabled' && checked) {
+        newData.aiFeaturesEnabled = true;
+      }
+      // 2. If "Enable AI" is unchecked, "Restrict to AI" must also be unchecked
+      if (name === 'aiFeaturesEnabled' && !checked) {
+        newData.onlyAiFeaturesEnabled = false;
+      }
+      
+      return newData;
+    });
+
     // Clear error for this field when user starts typing
     if (fieldErrors[name]) {
       setFieldErrors((prev) => ({ ...prev, [name]: null }));
@@ -274,6 +290,7 @@ const CompanyListing = () => {
       if (response.ok) {
         // Persist AI features setting locally as a cache
         localStorage.setItem(`ai_features_${formData.CompanyUserName}`, formData.aiFeaturesEnabled);
+        localStorage.setItem(`only_ai_features_${formData.CompanyUserName}`, formData.onlyAiFeaturesEnabled);
 
         if (!isEditing) setCurrentPage(1);
         fetchCompanies();

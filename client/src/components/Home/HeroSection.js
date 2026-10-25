@@ -2,6 +2,7 @@
 
 import { ArrowRight, Building } from "lucide-react";
 import { useTheme } from "../../context/ThemeContext";
+import { Link } from "react-router-dom";
 
 const HeroSection = () => {
     // ✅ Hook component ke andar
@@ -32,9 +33,11 @@ const HeroSection = () => {
                     </p>
 
                     <div className="flex flex-wrap gap-4 pt-2">
-                        <button className="bg-purple-600 hover:bg-indigo-700 text-white py-3 px-8 rounded-full font-medium transition-all duration-300 shadow-lg shadow-indigo-600/30 flex items-center gap-2">
-                            Get Started <ArrowRight size={18} />
-                        </button>
+                        <Link to="/login">
+                            <button className="bg-purple-600 hover:bg-indigo-700 text-white py-3 px-8 rounded-full font-medium transition-all duration-300 shadow-lg shadow-indigo-600/30 flex items-center gap-2">
+                                Get Started <ArrowRight size={18} />
+                            </button>
+                        </Link>
 
                         <button
                             className={`${theme === "dark" ? "bg-white/10 hover:bg-white/20 text-white" : "bg-gray-800/10 hover:bg-gray-800/20 text-gray-800"} py-3 px-8 rounded-full font-medium backdrop-blur-sm transition-all duration-300`}

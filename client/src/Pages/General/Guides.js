@@ -15,7 +15,7 @@ const Guides = () => {
                         <Compass className="w-10 h-10" />
                     </div>
                     <h2 className="text-2xl font-semibold mb-2">User Guides & Tutorials</h2>
-                    <p className="text-lg opacity-70 mb-6">Step-by-step guides to help you make the most of Invertis are being curated.</p>
+                    <p className="text-lg opacity-70 mb-6">Step-by-step guides to help you make the most of Placement seeker are being curated.</p>
                 </div>
             </div>
         </div>

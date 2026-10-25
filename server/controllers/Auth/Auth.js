@@ -1,4 +1,5 @@
 import User from '../../models/User.js'
+import Company from '../../models/company.js'
 import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
 import crypto from 'crypto'
@@ -47,8 +48,7 @@ const login = async (req, res) => {
     const { email } = req.body;
     const { company_id } = req.headers;
     console.log("company_id", company_id)
-    const payload = company_id === "super" ? { email, role: "super" } : { email, company_id };
-
+    const payload = company_id === "super" ? { email } : { email, company_id };
     const user = await User.findOne(payload);
     if (!user) {
       return res.status(400).json({ error: 'User not found' });
@@ -64,8 +64,21 @@ const login = async (req, res) => {
 
     // const token = generateToken(user);
     const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '3d' });
+
+    let companyUserName = null;
+    if (user.company_id && user.role !== 'super') {
+      const company = await Company.findById(user.company_id);
+      companyUserName = company ? company.CompanyUserName : null;
+    }
+
     res.cookie('token', token, { maxAge: 3600000, httpOnly: true });
-    res.status(200).json({ success: true, message: "Login successful", user, token });
+    res.status(200).json({ 
+      success: true, 
+      message: "Login successful", 
+      user, 
+      token,
+      companyUserName 
+    });
 
   }
   catch (error) {
@@ -91,7 +104,7 @@ const forgotPassword = async (req, res) => {
     const { email } = req.body;
     const company_id = req.headers["company_id"];
 
-    const payload = company_id === "super" ? { email, role: "super" } : { email, company_id };
+    const payload = company_id === "super" ? { email } : { email, company_id };
     const user = await User.findOne(payload);
 
     if (!user) {
